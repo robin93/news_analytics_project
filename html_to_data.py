@@ -1,45 +1,18 @@
 import urllib
 from bs4 import BeautifulSoup
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
-# input_text = open('Factiva_wipro.html','r+')
-
-
-
-# print input_text
-
-
-url = "Factiva_wipro.html"
+url = "/home/robin/Desktop/hff_project/Data/Large Cap/ACC/ACC_1-31.html"
 html = urllib.urlopen(url).read()
-
 soup = BeautifulSoup(html,"lxml")
-
-# print type(soup)
-
-# print soup.get_text()
-
-# print soup.prettify()
-
-# row =  soup.find_all('span', string='')
-
-# loop = 0
-# for r in row:
-# 	loop += 1
-# 	# print loop
-# 	# print r
-
-# pages = soup.find_all('p', string='')
-
-# loop2 = 0
-# for page in pages:
-# 	# print pages
-# 	loop2 += 1
-# 	# print loop2
-
-
 mydivs = soup.findAll("div", { "class" : "article" })
-
 # print len(mydivs)
 
+meta_info_output_file = open('/home/robin/Desktop/hff_project/Data/Large Cap/ACC/ACC_meta.txt', 'w')
+news_text_output_file = open('/home/robin/Desktop/hff_project/Data/Large Cap/ACC/ACC_news.txt','w')
+news_heading_text_output_file = open('/home/robin/Desktop/hff_project/Data/Large Cap/ACC/ACC_news_headings.txt','w')
 
 
 iteration = 0
@@ -59,42 +32,42 @@ for article in mydivs:
 			if tags.name in ['p','div']:
 				if len(tags.attrs.keys()) > 0:
 					if tags.attrs.keys()[0] == "id":
-						print tags.text.strip()
+						heading = tags.text.strip()
 			if tags.name == 'div':
 				serial_div += 1
-				if serial_div == 4:
+				# print serial_div,tags
+				if serial_div == 2:
 					length_of_article = tags.text
-				if serial_div == 5:
+				if serial_div == 3:
 					date = tags.text
-				# if len(tags.attrs.keys()) > 0:
-				# 	print tags.attrs
-				# 	print "\n"
-				# print tags
+				if serial_div == 4:
+					time = tags.text
 			if tags.name == 'p':
 				serial_p += 1
-				if serial_p == 3:
-					subheading = tags.text.strip()
-				if serial_p > 3:
+				# print serial_p,tags
+				# if serial_p == 3:
+				# 	subheading = tags.text.strip()
+				if serial_p > 2:
 					article_text = article_text + " " + tags.text.strip()
-		print subheading
+		# print subheading
 		print length_of_article
 		print date
+		print time
 		print article_text
-	# print article['class']
-	# for lines in article:
-	# 	print lines
-	# 	if lines.name in ["p","div"]:
-	#  		print type(lines)
-	#  		print lines.name
-	#  		print lines.id
-	#  	# print lines["class"]
-	# # div_tags = article.findAll("div")
-	# # print "number of div_tags",len(div_tags)
-	# # p_tags = article.findAll("p")
-	# # print "number of p tags",len(p_tags)
+		article_text = article_text.replace('\n',' ')
+		length_of_article = length_of_article.replace(' words','')
+		number_of_words = len(article_text.split())
+		# print article
+		if number_of_words > int(length_of_article)*0.3:
+			meta_info = length_of_article + "," + str(number_of_words) +","+ date + "," + time + "\n"
+			news_text = article_text + "\n"
+			heading_text = heading.replace('\n',' ') + "\n"
+			meta_info_output_file.writelines(meta_info)
+			news_text_output_file.writelines(news_text)
+			news_heading_text_output_file.writelines(heading_text)
 	print "\n\n\n"
-	if iteration > 1:
-		break
+	# if iteration > 5:
+		# break
 
 
 
